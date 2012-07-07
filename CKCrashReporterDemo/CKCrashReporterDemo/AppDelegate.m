@@ -39,25 +39,37 @@
     
     
     
-    
+    // Get the shared instance
     CKCrashReporter *reporter = [CKCrashReporter sharedReporter];
+  
+    // Modify the crash report for your own needs
     reporter.onSaveCrash  = ^(NSMutableDictionary *rawCrash) {
         [rawCrash setObject:[UIDevice currentDevice].model forKey:@"Model"];
     };
+    
+    // Specify the catch options
     reporter.catchOptions = CKCrashReporterCatchOptionAll;
+    
+    // Start catching
     [reporter beginCatching];
     
+    // Check if there is a crash available
     if ([reporter hasCrashAvailable]) {
+        
+        // Create a mail composer based on the crash and show it if there was no error
         NSError *error = nil;
-        NSLog(@"Latest crash -> %@", reporter.latestCrash);
         MFMailComposeViewController *composer = [reporter mailComposeViewControllerWithLatestCrashAsAttachmentAndError:&error];
         if (error)
             NSLog(@"Could not create mail composer -> %@", error);
         else
             [self.window.rootViewController presentModalViewController:composer animated:YES];
+       
+        // Remove the crash file
         [reporter removeLatestCrash];
     }
     else
+        
+        // Fake crash for testing
         [self performSelector:@selector(notThere)];
     
     
