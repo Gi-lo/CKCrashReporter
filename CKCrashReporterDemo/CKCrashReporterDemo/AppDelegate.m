@@ -26,6 +26,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #import "AppDelegate.h"
+#import "CKCrashReporter.h"
 
 @implementation AppDelegate
 @synthesize window = _window;
@@ -33,7 +34,34 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor whiteColor];
+    self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
+    
+    
+    
+    
+    CKCrashReporter *reporter = [CKCrashReporter sharedReporter];
+    reporter.onSaveCrash  = ^(NSMutableDictionary *rawCrash) {
+        [rawCrash setObject:[UIDevice currentDevice].model forKey:@"Model"];
+    };
+    reporter.catchOptions = CKCrashReporterCatchOptionAll;
+    [reporter beginCatching];
+    
+    if ([reporter hasCrashAvailable]) {
+        NSError *error = nil;
+        NSLog(@"Latest crash -> %@", reporter.latestCrash);
+        MFMailComposeViewController *composer = [reporter mailComposeViewControllerWithLatestCrashAsAttachmentAndError:&error];
+        if (error)
+            NSLog(@"Could not create mail composer -> %@", error);
+        else
+            [self.window.rootViewController presentModalViewController:composer animated:YES];
+        [reporter removeLatestCrash];
+    }
+    else
+        [self performSelector:@selector(notThere)];
+    
+    
+    
     
     return YES;
 }

@@ -12,6 +12,8 @@
 		6512B45315A86A4500A01DE9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6512B45215A86A4500A01DE9 /* CoreGraphics.framework */; };
 		6512B45B15A86A4500A01DE9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 6512B45A15A86A4500A01DE9 /* main.m */; };
 		6512B45F15A86A4500A01DE9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 6512B45E15A86A4500A01DE9 /* AppDelegate.m */; };
+		6512B46815A86CC900A01DE9 /* CKCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 6512B46715A86CC900A01DE9 /* CKCrashReporter.m */; };
+		6512B46A15A8712D00A01DE9 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6512B46915A8712D00A01DE9 /* MessageUI.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +26,9 @@
 		6512B45C15A86A4500A01DE9 /* CKCrashReporterDemo-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CKCrashReporterDemo-Prefix.pch"; sourceTree = "<group>"; };
 		6512B45D15A86A4500A01DE9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		6512B45E15A86A4500A01DE9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		6512B46615A86CC900A01DE9 /* CKCrashReporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKCrashReporter.h; sourceTree = "<group>"; };
+		6512B46715A86CC900A01DE9 /* CKCrashReporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKCrashReporter.m; sourceTree = "<group>"; };
+		6512B46915A8712D00A01DE9 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +36,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6512B46A15A8712D00A01DE9 /* MessageUI.framework in Frameworks */,
 				6512B44F15A86A4500A01DE9 /* UIKit.framework in Frameworks */,
 				6512B45115A86A4500A01DE9 /* Foundation.framework in Frameworks */,
 				6512B45315A86A4500A01DE9 /* CoreGraphics.framework in Frameworks */,
@@ -43,6 +49,7 @@
 		6512B43F15A86A4500A01DE9 = {
 			isa = PBXGroup;
 			children = (
+				6512B46515A86CB000A01DE9 /* CKCrashReporter */,
 				6512B45415A86A4500A01DE9 /* CKCrashReporterDemo */,
 				6512B44D15A86A4500A01DE9 /* Frameworks */,
 				6512B44B15A86A4500A01DE9 /* Products */,
@@ -60,6 +67,7 @@
 		6512B44D15A86A4500A01DE9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6512B46915A8712D00A01DE9 /* MessageUI.framework */,
 				6512B44E15A86A4500A01DE9 /* UIKit.framework */,
 				6512B45015A86A4500A01DE9 /* Foundation.framework */,
 				6512B45215A86A4500A01DE9 /* CoreGraphics.framework */,
@@ -85,6 +93,15 @@
 				6512B45C15A86A4500A01DE9 /* CKCrashReporterDemo-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		6512B46515A86CB000A01DE9 /* CKCrashReporter */ = {
+			isa = PBXGroup;
+			children = (
+				6512B46615A86CC900A01DE9 /* CKCrashReporter.h */,
+				6512B46715A86CC900A01DE9 /* CKCrashReporter.m */,
+			);
+			path = CKCrashReporter;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -149,6 +166,7 @@
 			files = (
 				6512B45B15A86A4500A01DE9 /* main.m in Sources */,
 				6512B45F15A86A4500A01DE9 /* AppDelegate.m in Sources */,
+				6512B46815A86CC900A01DE9 /* CKCrashReporter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
