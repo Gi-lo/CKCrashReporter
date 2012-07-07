@@ -45,7 +45,7 @@ enum {
     CKCrashReporterSIGILLSignal = 1 << 3,
     CKCrashReporterSIGBUSSignal = 1 << 4,
     CKCrashReporterSIGPIPESignal = 1 << 5,
-    CKCrashReporterAllSignals = 63,
+    CKCrashReporterAllSignals = 63
 };
 typedef NSUInteger CKCrashReporterSignal;
 
@@ -53,7 +53,7 @@ enum {
     CKCrashReporterCatchOptionLowMemoryWarnings = 1 << 0,
     CKCrashReporterCatchOptionSignals = 1 << 1,
     CKCrashReporterCatchOptionUncaughtException = 1 << 2,
-    CKCrashReporterCatchOptionAll = 7,
+    CKCrashReporterCatchOptionAll = 7
 };
 typedef NSUInteger CKCrashReporterCatchOption;
 
