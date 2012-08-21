@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------
- AppDelegate.h
+ CKCrashReporter.h
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,34 @@
  THE SOFTWARE.
  ---------------------------------------------------------------------- */
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
-@property (strong, nonatomic) UIWindow *window;
+/* ----------------------------------------------------------------------
+ @constants CKCrashReporter
+ ---------------------------------------------------------------------- */
+
+extern NSString *const CKCrashInfoNameKey;
+extern NSString *const CKCrashInfoExceptionReasonKey;
+extern NSString *const CKCrashInfoExceptionBacktraceKey;
+extern NSString *const CKCrashInfoMainThreadBacktraceKey;
+
+typedef void (^CKMutableDictionaryBlock)(NSMutableDictionary *dictionary);
+
+/* ----------------------------------------------------------------------
+ @interafe CKCrashReporter
+ ---------------------------------------------------------------------- */
+
+@interface CKCrashReporter : NSObject
+
+@property (nonatomic, unsafe_unretained, readonly, getter = hasCrashAvailable) BOOL crashAvailable;
+@property (nonatomic, unsafe_unretained, readonly) BOOL isCatching;
+
+@property (nonatomic, copy, readwrite) CKMutableDictionaryBlock onSaveCrash;
+
++ (CKCrashReporter *)sharedReporter;
+
+- (void)beginCatching;
+- (void)endCatching;
+
+- (void)removeLatestCrash;
+- (NSDictionary *)latestCrash;
+
 @end

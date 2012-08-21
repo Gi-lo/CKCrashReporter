@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------
- AppDelegate.h
+ CKCrashReporter+Mailing.h
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,21 @@
  THE SOFTWARE.
  ---------------------------------------------------------------------- */
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
-@property (strong, nonatomic) UIWindow *window;
+#import "CKCrashReporter.h"
+#import <MessageUI/MFMailComposeViewController.h>
+
+/* ----------------------------------------------------------------------
+ @constants CKCrashReporter (Mailing)
+ ---------------------------------------------------------------------- */
+
+extern NSString *const CKCrashReporterErrorDomain;
+
+/* ----------------------------------------------------------------------
+ @interface CKCrashReporter (Mailing)
+ ---------------------------------------------------------------------- */
+
+@interface CKCrashReporter (Mailing)
+
+- (MFMailComposeViewController *)mailComposeViewControllerWithLatestCrashAsAttachmentAndError:(NSError *__autoreleasing *)error;
+
 @end
