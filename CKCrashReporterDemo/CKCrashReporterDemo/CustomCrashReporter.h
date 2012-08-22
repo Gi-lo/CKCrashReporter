@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------
- CKCrashReporter+Mailing.h
+ CustomCrashReporter.h
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +21,8 @@
  ---------------------------------------------------------------------- */
 
 #import "CKCrashReporter.h"
-#import <MessageUI/MFMailComposeViewController.h>
 
-extern NSString *const CKCrashReporterErrorDomain;
+extern NSString *const CustomCrashReporterDeviceModelKey;
 
-@interface CKCrashReporter (Mailing)
-
-- (MFMailComposeViewController *)mailComposeViewControllerWithLatestCrashAsAttachmentAndError:(NSError *__autoreleasing *)error;
-
+@interface CustomCrashReporter : CKCrashReporter
 @end
