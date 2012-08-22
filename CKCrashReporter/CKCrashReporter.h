@@ -20,34 +20,30 @@
  THE SOFTWARE.
  ---------------------------------------------------------------------- */
 
-/* ----------------------------------------------------------------------
- @constants CKCrashReporter
- ---------------------------------------------------------------------- */
 
 extern NSString *const CKCrashInfoNameKey;
 extern NSString *const CKCrashInfoExceptionReasonKey;
 extern NSString *const CKCrashInfoExceptionBacktraceKey;
 extern NSString *const CKCrashInfoMainThreadBacktraceKey;
 
-typedef void (^CKMutableDictionaryBlock)(NSMutableDictionary *dictionary);
-
-/* ----------------------------------------------------------------------
- @interafe CKCrashReporter
- ---------------------------------------------------------------------- */
 
 @interface CKCrashReporter : NSObject
 
 @property (nonatomic, unsafe_unretained, readonly, getter = hasCrashAvailable) BOOL crashAvailable;
-@property (nonatomic, unsafe_unretained, readonly) BOOL isCatching;
+@property (nonatomic, unsafe_unretained, readwrite, getter = isCatchingExceptions) BOOL catchExceptions;
 
-@property (nonatomic, copy, readwrite) CKMutableDictionaryBlock onSaveCrash;
-
-+ (CKCrashReporter *)sharedReporter;
-
-- (void)beginCatching;
-- (void)endCatching;
-
-- (void)removeLatestCrash;
-- (NSDictionary *)latestCrash;
++ (id)sharedReporter;
+- (NSDictionary *)savedCrash;
+- (void)removeSavedCrash;
 
 @end
+
+
+@interface CKCrashReporter (subclasing)
+
+- (id)initSharedReporter;
+- (void)saveCrash:(NSMutableDictionary *)crash;
+- (NSString *)crashPath;
+
+@end
+

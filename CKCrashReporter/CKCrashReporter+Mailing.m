@@ -29,7 +29,7 @@
 NSString *const CKCrashReporterErrorDomain = @"de.Giulio_Petek.CKCrashReporter";
 
 /* ----------------------------------------------------------------------
- @@mplementation CKCrashReporter (Mailing)
+ @implementation CKCrashReporter (Mailing)
  ---------------------------------------------------------------------- */
 
 @implementation CKCrashReporter (Mailing)
@@ -46,7 +46,7 @@ NSString *const CKCrashReporterErrorDomain = @"de.Giulio_Petek.CKCrashReporter";
     if (*error)
         return nil;
     
-    NSData *xmlData = [NSPropertyListSerialization dataWithPropertyList:[self latestCrash]
+    NSData *xmlData = [NSPropertyListSerialization dataWithPropertyList:[self savedCrash]
                                                                  format:NSPropertyListXMLFormat_v1_0
                                                                 options:0
                                                                   error:&*error];

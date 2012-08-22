@@ -51,15 +51,8 @@ static void _exceptionCaught(NSException *exception);
 
 @interface CKCrashReporter ()
 
-@property (nonatomic, unsafe_unretained, readwrite) BOOL isCatching;
-
-- (id)_initSharedReporter;
-
 - (void)_didCatchUncaughtException:(NSNotification *)notification;
 - (void)_handleException:(NSException *)exception;
-- (void)_persistCrash:(NSMutableDictionary *)crash;
-
-- (NSString *)_crashFilePath;
 
 - (NSString *)_reasonOfException:(NSException *)exception;
 - (NSString *)_nameOfException:(NSException *)exception;
@@ -74,8 +67,25 @@ static void _exceptionCaught(NSException *exception);
  ---------------------------------------------------------------------- */
 
 @implementation CKCrashReporter
-@synthesize onSaveCrash = _onSaveCrash;
-@synthesize isCatching = _isCatching;
+@synthesize catchExceptions = _catchExceptions;
+
+#pragma mark Subclassing
+
+- (id)initSharedReporter {
+    if ((self = [super init]))
+        _catchExceptions = NO;
+    
+    return self;
+}
+
+- (NSString *)crashPath {
+    NSString *caches_dir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    return [caches_dir stringByAppendingFormat:@"%@_crash.plist", NSStringFromClass([self class])];
+}
+
+- (void)saveCrash:(NSMutableDictionary *)crash {
+    [crash writeToFile:[self crashPath] atomically:YES];
+}
 
 #pragma mark Init
 
@@ -83,28 +93,14 @@ static void _exceptionCaught(NSException *exception);
     static dispatch_once_t __sharedToken = 0;
     static CKCrashReporter * __sharedReporter = nil;
     dispatch_once(&__sharedToken, ^{
-        __sharedReporter = [[self alloc] _initSharedReporter];
+        __sharedReporter = [[self alloc] initSharedReporter];
     });
     return __sharedReporter;
-}
-
-- (id)_initSharedReporter {
-    if ((self = [super init]))
-        _isCatching = NO;
-    
-    return self;
 }
 
 - (id)init {
     NSAssert(0, @"Do not initialize your own CKCrashReporter. Use the singleton instead.");
     return nil;
-}
-
-#pragma mark Catch
-
-- (NSString *)_crashFilePath {
-    NSString *caches_dir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    return [caches_dir stringByAppendingFormat:@"%@_crash.plist", NSStringFromClass([self class])];
 }
 
 #pragma mark Helper
@@ -132,31 +128,27 @@ static void _exceptionCaught(NSException *exception);
 
 #pragma mark Manage catching
 
-- (void)beginCatching {
-    if (self.isCatching)
+- (void)setCatchExceptions:(BOOL)catchExceptions {
+    if (catchExceptions == _catchExceptions)
         return;
     
-    self.isCatching = YES;
-
-    NSSetUncaughtExceptionHandler(&_exceptionCaught);
-
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(_didCatchUncaughtException:)
-                                                 name:kCrashReporterDidCatchExceptionNotification
-                                               object:nil];
-}
-
-- (void)endCatching {
-    if (!self.isCatching)
-        return;
-
-    self.isCatching = NO;
-
-    NSSetUncaughtExceptionHandler(nil);
+    _catchExceptions = catchExceptions;
     
-    [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:kCrashReporterDidCatchExceptionNotification
-                                                  object:nil];
+    NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
+    if (_catchExceptions) {
+        NSSetUncaughtExceptionHandler(&_exceptionCaught);
+        
+        [defaultCenter addObserver:self
+                          selector:@selector(_didCatchUncaughtException:)
+                              name:kCrashReporterDidCatchExceptionNotification
+                            object:nil];
+    } else {
+        NSSetUncaughtExceptionHandler(nil);
+        
+        [defaultCenter removeObserver:self
+                                 name:kCrashReporterDidCatchExceptionNotification
+                               object:nil];
+    }
 }
 
 #pragma mark Private - Handle catches
@@ -172,7 +164,7 @@ static void _exceptionCaught(NSException *exception);
     [crash setObject:[self _backtraceOfException:exception] forKey:CKCrashInfoExceptionBacktraceKey];
     [crash setObject:[self _mainThreadBacktrace] forKey:CKCrashInfoMainThreadBacktraceKey];
 
-    [self _persistCrash:crash];
+    [self saveCrash:crash];
     
     [exception raise];
 }
@@ -187,31 +179,24 @@ static void _exceptionCaught(NSException *exception) {
 
 #pragma mark Manage crash
 
-- (void)_persistCrash:(NSMutableDictionary *)crash {
-    if (self.onSaveCrash)
-        self.onSaveCrash(crash);
-    
-    [crash writeToFile:[self _crashFilePath] atomically:YES];
-}
-
 - (BOOL)hasCrashAvailable {
-    return [[NSFileManager defaultManager] fileExistsAtPath:[self _crashFilePath]];
+    return [[NSFileManager defaultManager] fileExistsAtPath:[self crashPath]];
 }
 
-- (NSDictionary *)latestCrash {
+- (NSDictionary *)savedCrash {
     if (![self hasCrashAvailable])
         return nil;
-    return [NSDictionary dictionaryWithContentsOfFile:[self _crashFilePath]];
+    return [NSDictionary dictionaryWithContentsOfFile:[self crashPath]];
 }
 
-- (void)removeLatestCrash {
-    [[NSFileManager defaultManager] removeItemAtPath:[self _crashFilePath] error:nil];
+- (void)removeSavedCrash {
+    [[NSFileManager defaultManager] removeItemAtPath:[self crashPath] error:nil];
 }
 
 #pragma mark Memory
 
 - (void)dealloc {
-    [self endCatching];
+    self.catchExceptions = NO;
 }
 
 @end

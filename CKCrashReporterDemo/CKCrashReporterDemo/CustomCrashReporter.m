@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------
- AppDelegate.m
+ CustomCrashReporter.m
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -20,40 +20,35 @@
  THE SOFTWARE.
  ---------------------------------------------------------------------- */
 
-#import "AppDelegate.h"
-
-#import "CKCrashReporter+Mailing.h"
 #import "CustomCrashReporter.h"
 
-@implementation AppDelegate
-@synthesize window = _window;
+/* ----------------------------------------------------------------------
+ @constants CKCrashReporter
+ ---------------------------------------------------------------------- */
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.backgroundColor = [UIColor whiteColor];
-    self.window.rootViewController = [[UIViewController alloc] init];
-    [self.window makeKeyAndVisible];
-    
-    CustomCrashReporter *reporter = [CustomCrashReporter sharedReporter];
-    reporter.catchExceptions = YES;
-    
-    if ([reporter hasCrashAvailable]) {
-        NSLog(@"Crashreporter did found crash: %@", [reporter savedCrash]);
-        
-        NSError *error = nil;
-        MFMailComposeViewController *mailComposer = [reporter mailComposeViewControllerWithLatestCrashAsAttachmentAndError:&error];
-        if (error)
-            NSLog(@"Error creation mail composer: %@", error);
-        else
-            [self.window.rootViewController presentModalViewController:mailComposer animated:YES];
-        
-        [reporter removeSavedCrash];
-    }
-    else
-        [self performSelector:@selector(fakeCrash)];
+NSString *const CustomCrashReporterDeviceModelKey = @"Model";
 
+/* ----------------------------------------------------------------------
+ @implementation CustomCrashReporter
+ ---------------------------------------------------------------------- */
+
+@implementation CustomCrashReporter
+
+#pragma mark @override
+
+- (void)saveCrash:(NSMutableDictionary *)crash {
     
-    return YES;
+    // Modify the raw crash
+    [crash setObject:[UIDevice currentDevice].model forKey:CustomCrashReporterDeviceModelKey];
+    
+    // Call super!
+    [super saveCrash:crash];
+}
+
+- (NSString *)crashPath {
+    
+    // Set custom crash path. In this example the temporary directory of your application.
+    return [NSTemporaryDirectory() stringByAppendingPathComponent:@"TMPCrash.plist"];
 }
 
 @end

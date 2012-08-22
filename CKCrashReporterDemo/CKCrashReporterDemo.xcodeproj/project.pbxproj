@@ -14,6 +14,7 @@
 		6512B45F15A86A4500A01DE9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 6512B45E15A86A4500A01DE9 /* AppDelegate.m */; };
 		6512B46A15A8712D00A01DE9 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6512B46915A8712D00A01DE9 /* MessageUI.framework */; };
 		6560953715E33D9100C61452 /* CKCrashReporter+Mailing.m in Sources */ = {isa = PBXBuildFile; fileRef = 6560953615E33D9100C61452 /* CKCrashReporter+Mailing.m */; };
+		6594AF2315E493A800F168CE /* CustomCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 6594AF2215E493A800F168CE /* CustomCrashReporter.m */; };
 		65A3543415E3311000946E04 /* CKCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 65A3543315E3311000946E04 /* CKCrashReporter.m */; };
 /* End PBXBuildFile section */
 
@@ -30,6 +31,8 @@
 		6512B46915A8712D00A01DE9 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		6560953515E33D9100C61452 /* CKCrashReporter+Mailing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CKCrashReporter+Mailing.h"; sourceTree = "<group>"; };
 		6560953615E33D9100C61452 /* CKCrashReporter+Mailing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CKCrashReporter+Mailing.m"; sourceTree = "<group>"; };
+		6594AF2115E493A800F168CE /* CustomCrashReporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomCrashReporter.h; sourceTree = "<group>"; };
+		6594AF2215E493A800F168CE /* CustomCrashReporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomCrashReporter.m; sourceTree = "<group>"; };
 		65A3543215E3311000946E04 /* CKCrashReporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKCrashReporter.h; sourceTree = "<group>"; };
 		65A3543315E3311000946E04 /* CKCrashReporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKCrashReporter.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -81,6 +84,8 @@
 		6512B45415A86A4500A01DE9 /* CKCrashReporterDemo */ = {
 			isa = PBXGroup;
 			children = (
+				6594AF2115E493A800F168CE /* CustomCrashReporter.h */,
+				6594AF2215E493A800F168CE /* CustomCrashReporter.m */,
 				6512B45D15A86A4500A01DE9 /* AppDelegate.h */,
 				6512B45E15A86A4500A01DE9 /* AppDelegate.m */,
 				6512B45515A86A4500A01DE9 /* Supporting Files */,
@@ -174,6 +179,7 @@
 				6512B45F15A86A4500A01DE9 /* AppDelegate.m in Sources */,
 				65A3543415E3311000946E04 /* CKCrashReporter.m in Sources */,
 				6560953715E33D9100C61452 /* CKCrashReporter+Mailing.m in Sources */,
+				6594AF2315E493A800F168CE /* CustomCrashReporter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
