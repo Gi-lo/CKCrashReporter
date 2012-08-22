@@ -34,7 +34,6 @@
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
     
-
     CKCrashReporter *reporter = [CKCrashReporter sharedReporter];
     reporter.onSaveCrash  = ^(NSMutableDictionary *rawCrash) {
         [rawCrash setObject:[UIDevice currentDevice].model forKey:@"Model"];

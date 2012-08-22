@@ -96,7 +96,7 @@ static void _exceptionCaught(NSException *exception);
 }
 
 - (id)init {
-    NSAssert(1, @"Do not initialize your own CKCrashReporter. Use the singleton instead.");
+    NSAssert(0, @"Do not initialize your own CKCrashReporter. Use the singleton instead.");
     return nil;
 }
 
