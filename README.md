@@ -1,7 +1,7 @@
 #CKCrashReporter
 
 ##1. What is it?
-`CKCrashReporter` is a very easy to use crash reporter class for your `iOS` application. It was designed to be easily extendable. _(More information on this can be found under #3)_. `CKCrashReporter` will catch any uncaught `NSException` and save useful information about it on disk. The next time the user starts the application you can read out that information and e.g. send a mail wit it via `MFMailComposeViewController`.
+`CKCrashReporter` is a very easy to use crash reporter class for your `iOS` application. It was designed to be easily extendable. _(More information on this can be found under #3)_. `CKCrashReporter` will catch any uncaught `NSException` and save useful information about it on disk. The next time the user starts the application you can read out that information and e.g. send a mail wit it via `MFMailComposeViewController`. If you need a more complex component [KSCrash](https://github.com/kstenerud/KSCrash) should be your first choice!
 
 ##2. How to use it?
 
@@ -29,7 +29,6 @@ if ([reporter hasCrashAvailable]) {
     // Remove the saved crash as we already handled it
     [reporter removeSavedCrash];
 }
-
 ```
 
 You may want to do this in `- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions;`.
