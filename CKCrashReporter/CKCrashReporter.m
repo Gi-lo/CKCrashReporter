@@ -23,13 +23,6 @@
 #import "CKCrashReporter.h"
 
 /* ----------------------------------------------------------------------
- @defines CKCrashReporter
- ---------------------------------------------------------------------- */
-
-#define kCrashReporterDidCatchExceptionNotification @"CKCrashReporterDidCatchExceptionNotification"
-#define kExceptionUserInfoKey @"NSException"
-
-/* ----------------------------------------------------------------------
  @constants CKCrashReporter
  ---------------------------------------------------------------------- */
 
@@ -51,7 +44,6 @@ static void _exceptionCaught(NSException *exception);
 
 @interface CKCrashReporter ()
 
-- (void)_didCatchUncaughtException:(NSNotification *)notification;
 - (void)_handleException:(NSException *)exception;
 
 - (NSString *)_reasonOfException:(NSException *)exception;
@@ -100,6 +92,7 @@ static void _exceptionCaught(NSException *exception);
 
 - (id)init {
     NSAssert(0, @"Do not initialize your own CKCrashReporter. Use the singleton instead.");
+    
     return nil;
 }
 
@@ -134,30 +127,15 @@ static void _exceptionCaught(NSException *exception);
     
     _catchExceptions = catchExceptions;
     
-    NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
-    if (_catchExceptions) {
+    if (_catchExceptions)
         NSSetUncaughtExceptionHandler(&_exceptionCaught);
-        
-        [defaultCenter addObserver:self
-                          selector:@selector(_didCatchUncaughtException:)
-                              name:kCrashReporterDidCatchExceptionNotification
-                            object:nil];
-    } else {
+    else
         NSSetUncaughtExceptionHandler(nil);
-        
-        [defaultCenter removeObserver:self
-                                 name:kCrashReporterDidCatchExceptionNotification
-                               object:nil];
-    }
 }
 
 #pragma mark Private - Handle catches
 
-- (void)_didCatchUncaughtException:(NSNotification *)notification {
-    [self _handleException:[[notification userInfo] objectForKey:kExceptionUserInfoKey]];
-}
-
-- (void)_handleException:(NSException *)exception {   
+- (void)_handleException:(NSException *)exception {
     NSMutableDictionary *crash = [[NSMutableDictionary alloc] initWithCapacity:3];
     [crash setObject:[self _reasonOfException:exception] forKey:CKCrashInfoReasonKey];
     [crash setObject:[self _nameOfException:exception] forKey:CKCrashInfoNameKey];
@@ -172,9 +150,9 @@ static void _exceptionCaught(NSException *exception);
 #pragma mark UncaughtExceptionsHandler
 
 static void _exceptionCaught(NSException *exception) {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kCrashReporterDidCatchExceptionNotification 
-                                                        object:nil
-                                                      userInfo:[NSDictionary dictionaryWithObject:exception forKey:kExceptionUserInfoKey]];
+    [[CKCrashReporter sharedReporter] performSelectorOnMainThread:@selector(_handleException:)
+                                                       withObject:exception
+                                                    waitUntilDone:YES];
 }
 
 #pragma mark Manage crash
@@ -196,7 +174,8 @@ static void _exceptionCaught(NSException *exception) {
 #pragma mark Memory
 
 - (void)dealloc {
-    self.catchExceptions = NO;
+    if (self.catchExceptions)
+        NSSetUncaughtExceptionHandler(nil);
 }
 
 @end
