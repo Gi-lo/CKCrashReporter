@@ -137,8 +137,8 @@ static void _exceptionCaught(NSException *exception);
 
 - (void)_handleException:(NSException *)exception {
     NSMutableDictionary *crash = [[NSMutableDictionary alloc] initWithCapacity:3];
-    [crash setObject:[self _reasonOfException:exception] forKey:CKCrashInfoReasonKey];
-    [crash setObject:[self _nameOfException:exception] forKey:CKCrashInfoNameKey];
+    [crash setObject:[self _reasonOfException:exception] forKey:CKCrashInfoExceptionReasonKey];
+    [crash setObject:[self _nameOfException:exception] forKey:CKCrashInfoExceptionNameKey];
     [crash setObject:[self _backtraceOfException:exception] forKey:CKCrashInfoExceptionBacktraceKey];
     [crash setObject:[self _mainThreadBacktrace] forKey:CKCrashInfoMainThreadBacktraceKey];
 
