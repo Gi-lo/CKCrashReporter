@@ -22,7 +22,7 @@
  ---------------------------------------------------------------------- */
 
 
-extern NSString *const CKCrashInfoNameKey;
+extern NSString *const CKCrashInfoExceptionNameKey;
 extern NSString *const CKCrashInfoExceptionReasonKey;
 extern NSString *const CKCrashInfoExceptionBacktraceKey;
 extern NSString *const CKCrashInfoMainThreadBacktraceKey;

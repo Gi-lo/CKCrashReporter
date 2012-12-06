@@ -27,9 +27,8 @@
  @constants CKCrashReporter
  ---------------------------------------------------------------------- */
 
-NSString *const CKSignalReceivedExceptionName = @"CKSignalReceived";
-NSString *const CKCrashInfoReasonKey = @"Reason";
-NSString *const CKCrashInfoNameKey = @"Name";
+NSString *const CKCrashInfoExceptionNameKey = @"Name";
+NSString *const CKCrashInfoExceptionReasonKey = @"Reason";
 NSString *const CKCrashInfoExceptionBacktraceKey = @"Exception backtrace";
 NSString *const CKCrashInfoMainThreadBacktraceKey = @"Main thread backtrace";
 
