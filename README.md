@@ -38,8 +38,8 @@ If you want to access information of the crash you can simple use the predefined
 
 * CKCrashInfoNameKey: The `NSException`'s name.
 * CKCrashInfoExceptionReasonKey: The `NSException`'s reason.
-* CKCrashInfoNameKey: The `NSException`'s backtrace.
-* CKCrashInfoNameKey: The main thread's backtrace when the exception was thrown.
+* CKCrashInfoBacktraceKey: The backtrace right before the crash.
+* CKCrashInfoHashKey: The unique crash hash.
 
 ##3. How to extend it?
 
@@ -54,7 +54,7 @@ If you want to have additional information in your crashes like e.g. the device 
 If you want a custom crash location you have to return it in `- (NSString *)crashPath;`.
 
 ##4. How does it work?
-Basically `CKCrashReporter` takes advantage of `NSSetUncaughtExceptionHandler()`. This allows you to do additional stuff when an uncaught `NSException` is about to be thrown. To get a better understanding of why this works you need to know that the exception is not crashing your applicaion. Furthermore it starts a "kill chain" on `[NSException raise]` which then terminates your application. With `NSSetUncaughtExceptionHandler()` we can avoid that "kill chain" and perform our code instead. When we are done with our additional code we still call `[NSException raise]` as the application state may be corrupted.
+Basically `CKCrashReporter` takes advantage of method swizzling. It takes its action whenever a new `NSException` is about to be created. To get a better understanding of why this works you need to know that the exception is not crashing your applicaion. Furthermore it starts a "kill chain" on `[NSException raise]` which then terminates your application. With `NSSetUncaughtExceptionHandler()` we can avoid that "kill chain" and perform our code instead. When we are done with our additional code we still call `[NSException raise]` as the application state may be corrupted.
 
 ##5. License
 CKCrashReporter is available under the MIT license. See the LICENSE file for more info.
