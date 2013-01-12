@@ -37,22 +37,24 @@
     
     CustomCrashReporter *reporter = [CustomCrashReporter sharedReporter];
     reporter.catchExceptions = YES;
-    
+
     if ([reporter hasCrashAvailable]) {
         NSLog(@"Crashreporter did found crash: %@", [reporter savedCrash]);
         
         NSError *error = nil;
         MFMailComposeViewController *mailComposer = [reporter mailComposeViewControllerWithLatestCrashAsAttachmentAndError:&error];
-        if (error)
+        if (error) {
             NSLog(@"Error creation mail composer: %@", error);
-        else
+        }
+        else {
             [self.window.rootViewController presentModalViewController:mailComposer animated:YES];
+        }
         
         [reporter removeSavedCrash];
     }
-    else
+    else {
         [self performSelector:@selector(fakeCrash)];
-
+    }
     
     return YES;
 }

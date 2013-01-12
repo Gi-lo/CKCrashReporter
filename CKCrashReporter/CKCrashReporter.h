@@ -21,12 +21,15 @@
  THE SOFTWARE.
  ---------------------------------------------------------------------- */
 
+/* --- Extern --------------------------------------------------------- */
 
 extern NSString *const CKCrashInfoExceptionNameKey;
 extern NSString *const CKCrashInfoExceptionReasonKey;
-extern NSString *const CKCrashInfoExceptionBacktraceKey;
-extern NSString *const CKCrashInfoMainThreadBacktraceKey;
+extern NSString *const CKCrashInfoBacktraceKey;
+extern NSString *const CKCrashInfoHashKey;
+extern NSString *const CKCrashReporterUnknownInformation;
 
+/* --- Interface ------------------------------------------------------ */
 
 @interface CKCrashReporter : NSObject
 
@@ -39,6 +42,7 @@ extern NSString *const CKCrashInfoMainThreadBacktraceKey;
 
 @end
 
+/* --- Interface (subclasing) ------------------------------------------ */
 
 @interface CKCrashReporter (subclasing)
 
