@@ -22,6 +22,9 @@
  ---------------------------------------------------------------------- */
 
 #import "CKCrashReporter.h"
+#import <objc/runtime.h>
+#import <objc/message.h>
+#import <CommonCrypto/CommonDigest.h>
 
 /* ----------------------------------------------------------------------
  @constants CKCrashReporter
@@ -29,14 +32,9 @@
 
 NSString *const CKCrashInfoExceptionNameKey = @"Name";
 NSString *const CKCrashInfoExceptionReasonKey = @"Reason";
-NSString *const CKCrashInfoExceptionBacktraceKey = @"Exception backtrace";
-NSString *const CKCrashInfoMainThreadBacktraceKey = @"Main thread backtrace";
-
-/* ----------------------------------------------------------------------
- @c-methods CKCrashReporter
- ---------------------------------------------------------------------- */
-
-static void _exceptionCaught(NSException *exception);
+NSString *const CKCrashInfoBacktraceKey = @"Backtrace";
+NSString *const CKCrashInfoHashKey = @"Hash";
+NSString *const CKCrashReporterUnknownInformation = @"Unknown";
 
 /* ----------------------------------------------------------------------
  @interface CKCrashReporter ()
@@ -44,13 +42,12 @@ static void _exceptionCaught(NSException *exception);
 
 @interface CKCrashReporter ()
 
-- (void)_handleException:(NSException *)exception;
+- (void)_willCreateExceptionWithName:(NSString *)name reason:(NSString *)reason userInfo:(NSDictionary *)userinfo;
 
-- (NSString *)_reasonOfException:(NSException *)exception;
-- (NSString *)_nameOfException:(NSException *)exception;
+- (void)_swizzleNSExceptionInit;
+- (void)_resetNSExceptionInit;
 
-- (NSArray *)_backtraceOfException:(NSException *)exception;
-- (NSArray *)_mainThreadBacktrace;
+- (NSString *)_md5HashOfBacktrace:(NSArray *)backtrace name:(NSString *)name;
 
 @end
 
@@ -60,24 +57,6 @@ static void _exceptionCaught(NSException *exception);
 
 @implementation CKCrashReporter
 @synthesize catchExceptions = _catchExceptions;
-
-#pragma mark Subclassing
-
-- (id)initSharedReporter {
-    if ((self = [super init]))
-        _catchExceptions = NO;
-    
-    return self;
-}
-
-- (NSString *)crashPath {
-    NSString *caches_dir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    return [caches_dir stringByAppendingFormat:@"%@_crash.plist", NSStringFromClass([self class])];
-}
-
-- (void)saveCrash:(NSMutableDictionary *)crash {
-    [crash writeToFile:[self crashPath] atomically:YES];
-}
 
 #pragma mark Init
 
@@ -91,68 +70,119 @@ static void _exceptionCaught(NSException *exception);
 }
 
 - (id)init {
-    NSAssert(0, @"Do not initialize your own CKCrashReporter. Use the singleton instead.");
+    @throw @"Do not initialize your own CKCrashReporter. Use the singleton instead.";
     
     return nil;
 }
 
+#pragma mark Swizzling
+
+- (void)_swizzleNSExceptionInit {
+    Class origClass = [NSException class];
+    Class newClass = [self class];
+    SEL origSelector = @selector(initWithName:reason:userInfo:);
+    SEL newSelector = @selector(_willCreateExceptionWithName:reason:userInfo:);
+    Method origMethod = class_getInstanceMethod(origClass, origSelector);
+    Method newMethod = class_getInstanceMethod(newClass, newSelector);
+    
+    if (class_addMethod(origClass, origSelector, method_getImplementation(newMethod), method_getTypeEncoding(newMethod))) {
+        class_replaceMethod(newClass, newSelector, method_getImplementation(origMethod), method_getTypeEncoding(origMethod));
+    }
+    else {
+        method_exchangeImplementations(origMethod, newMethod);
+    }
+}
+
+- (void)_resetNSExceptionInit {
+    Class origClass = [self class];
+    Class newClass = [NSException class];
+    SEL origSelector = @selector(_willCreateExceptionWithName:reason:userInfo:);
+    SEL newSelector = @selector(initWithName:reason:userInfo:);
+    Method origMethod = class_getInstanceMethod(origClass, origSelector);
+    Method newMethod = class_getInstanceMethod(newClass, newSelector);
+    
+    if (class_addMethod(origClass, origSelector, method_getImplementation(newMethod), method_getTypeEncoding(newMethod))) {
+        class_replaceMethod(newClass, newSelector, method_getImplementation(origMethod), method_getTypeEncoding(origMethod));
+    }
+    else {
+        method_exchangeImplementations(origMethod, newMethod);
+    }
+}
+
+#pragma mark Subclassing
+
+- (id)initSharedReporter {
+    if ((self = [super init])) {
+        _catchExceptions = NO;
+    }
+    
+    return self;
+}
+
+- (NSString *)crashPath {
+    NSString *caches_dir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    return [caches_dir stringByAppendingFormat:@"%@_crash.plist", NSStringFromClass([self class])];
+}
+
+- (void)saveCrash:(NSMutableDictionary *)crash {
+    [crash writeToFile:[self crashPath] atomically:YES];
+}
+
 #pragma mark Helper
 
-- (NSArray *)_mainThreadBacktrace {
-    if (![NSThread isMainThread])
-        return [self performSelector:@selector(_mainThreadBacktrace)];
+- (NSString *)_md5HashOfBacktrace:(NSArray *)backtrace name:(NSString *)name {
+    NSMutableString *string = [NSMutableString string];
+    for (NSString *frame in backtrace) {
+        [string appendString:frame];
+    }
+    [string appendString:name];
         
-    return [[NSThread callStackSymbols] count] ? [NSThread callStackSymbols] : [NSArray array];
-}
-
-#pragma mark NSExceptionHelper
-
-- (NSString *)_reasonOfException:(NSException *)exception {
-    return exception.reason ? exception.reason : @"Unknown";
-}
-
-- (NSArray *)_backtraceOfException:(NSException *)exception {
-    return exception.callStackSymbols.count ? exception.callStackSymbols : [NSArray array];
-}
-
-- (NSString *)_nameOfException:(NSException *)exception {
-    return exception.name ? exception.name : @"Unknown";
+    const char *ptr = [string UTF8String];
+    unsigned char md5Buffer[CC_MD5_DIGEST_LENGTH];
+    
+    CC_MD5(ptr, (unsigned int)strlen(ptr), md5Buffer);
+    NSMutableString *output = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
+    for (int i = 0; i < CC_MD5_DIGEST_LENGTH; i++) {
+        [output appendFormat:@"%02x", md5Buffer[i]];
+    }
+    
+    return [output copy];
 }
 
 #pragma mark Manage catching
 
 - (void)setCatchExceptions:(BOOL)catchExceptions {
-    if (catchExceptions == _catchExceptions)
+    if (catchExceptions == _catchExceptions) {
         return;
+    }
     
     _catchExceptions = catchExceptions;
     
-    if (_catchExceptions)
-        NSSetUncaughtExceptionHandler(&_exceptionCaught);
-    else
-        NSSetUncaughtExceptionHandler(nil);
+    if (_catchExceptions) {
+        [self _swizzleNSExceptionInit];
+    }
+    else {
+        [self _resetNSExceptionInit];
+    }
 }
 
-#pragma mark Private - Handle catches
+#pragma mark Private - Handle catches (In NSException context)
 
-- (void)_handleException:(NSException *)exception {
-    NSMutableDictionary *crash = [[NSMutableDictionary alloc] initWithCapacity:3];
-    [crash setObject:[self _reasonOfException:exception] forKey:CKCrashInfoExceptionReasonKey];
-    [crash setObject:[self _nameOfException:exception] forKey:CKCrashInfoExceptionNameKey];
-    [crash setObject:[self _backtraceOfException:exception] forKey:CKCrashInfoExceptionBacktraceKey];
-    [crash setObject:[self _mainThreadBacktrace] forKey:CKCrashInfoMainThreadBacktraceKey];
-
-    [self saveCrash:crash];
+- (void)_willCreateExceptionWithName:(NSString *)name reason:(NSString *)reason userInfo:(NSDictionary *)userinfo {
+    CKCrashReporter *reporter = [CKCrashReporter sharedReporter];
     
-    [exception raise];
-}
-
-#pragma mark UncaughtExceptionsHandler
-
-static void _exceptionCaught(NSException *exception) {
-    [[CKCrashReporter sharedReporter] performSelectorOnMainThread:@selector(_handleException:)
-                                                       withObject:exception
-                                                    waitUntilDone:YES];
+    NSArray *backtrace = [NSThread callStackSymbols];
+    
+    NSDictionary *crash = @{
+        CKCrashInfoExceptionReasonKey : [reason length] ? reason : CKCrashReporterUnknownInformation,
+        CKCrashInfoExceptionNameKey : [name length] ? name : CKCrashReporterUnknownInformation,
+        CKCrashInfoBacktraceKey : backtrace,
+        CKCrashInfoHashKey : [reporter _md5HashOfBacktrace:backtrace name:name]
+    };
+    
+    [reporter saveCrash:[crash mutableCopy]];
+    
+    abort();
 }
 
 #pragma mark Manage crash
@@ -162,8 +192,10 @@ static void _exceptionCaught(NSException *exception) {
 }
 
 - (NSDictionary *)savedCrash {
-    if (![self hasCrashAvailable])
+    if (![self hasCrashAvailable]) {
         return nil;
+    }
+    
     return [NSDictionary dictionaryWithContentsOfFile:[self crashPath]];
 }
 
@@ -174,8 +206,9 @@ static void _exceptionCaught(NSException *exception) {
 #pragma mark Memory
 
 - (void)dealloc {
-    if (self.catchExceptions)
-        NSSetUncaughtExceptionHandler(nil);
+    if (self.catchExceptions) {
+        [self _resetNSExceptionInit];
+    }
 }
 
 @end
